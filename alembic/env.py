@@ -8,8 +8,15 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from app.core.config import settings # Import your app's settings
+from app.db.base_class import Base  # Import your Base for metadata
+from app.models.user import User    # Import all your models here
+# Add other models here if you have them, e.g.:
+# from app.models.item import Item
 
 
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..')) # Adds project root to sys.path
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +31,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -44,7 +51,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+
+    url = settings.SQLALCHEMY_DATABASE_URL # Import your app's settings
+    # url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -63,8 +72,17 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    db_url = settings.SQLALCHEMY_DATABASE_URL
+    if not db_url:
+        raise Exception("Database URL not configured. Check your .env file and app.core.config settings.")
+
+    # Create a configuration dictionary for engine_from_config
+    # This ensures Alembic uses the same URL as your application
+    engine_config = config.get_section(config.config_ini_section).copy()
+    engine_config["sqlalchemy.url"] = db_url
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        engine_config,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
