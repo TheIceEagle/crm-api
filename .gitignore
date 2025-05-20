@@ -78,10 +78,9 @@ instance/
 docs/_build/
 
 # PyBuilder
-<<<<<<< HEAD
-=======
+
+
 .pybuilder/
->>>>>>> 58da1ad0d0e11fbf5ce4ff00019738ec3103aaeb
 target/
 
 # Jupyter Notebook
